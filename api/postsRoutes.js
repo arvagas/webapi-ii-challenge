@@ -9,7 +9,7 @@ const router = express.Router()
 router.post('/', (req, res) => {
     const newPost = req.body
 
-    if (newPost.title === undefined || newPost.contents ===undefined) {
+    if (!newPost.title || !newPost.contents) {
         res.status(400).json({
             errorMessage: "Please provide title and contents for the post."
         })
@@ -111,7 +111,20 @@ router.delete('/:id', (req, res) => {
 
 // @@@@@@@@@@ PUT request @@@@@@@@@@
 router.put('/:id', (req, res) => {
-    res.send('hello from the PUT /api/posts/:id endpoint')
+    const { id } = req.params
+    const updatePost = req.body
+
+    if (!updatePost.title || !updatePost.contents) {
+        res.status(400).json({ errorMessage: "Please provide title and contents for the post." })
+    } else {
+        db.update(id, updatePost)
+        .then(post => {
+            post ? res.json({ id: id, ...updatePost }) : res.status(404).json({ message: "The post with the specified ID does not exist." })
+        })
+        .catch(err => {
+            res.status(500).json({ error: "The post information could not be modified." })
+        })
+    }
 })
 
 module.exports = router
