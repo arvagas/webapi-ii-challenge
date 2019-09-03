@@ -90,7 +90,23 @@ router.get('/:id/comments', (req, res) => {
 
 // @@@@@@@@@@ DELETE request @@@@@@@@@@
 router.delete('/:id', (req, res) => {
-    res.send('hello from the DELETE /api/posts/:id endpoint')
+    const { id } = req.params
+
+    db.findById(id)
+    .then(post => {
+        if (post && post.length) {
+            db.remove(id)
+            .then(removedPost => res.json(post))
+            .catch(err => {
+                res.status(500).json({ error: "The post could not be removed" })
+            })
+        } else {
+            res.status(404).json({ message: "The post with the specified ID does not exist." })
+        }
+    })
+    .catch(err => {
+        res.status(500).json({ error: "The post information could not be retrieved." })
+    })
 })
 
 // @@@@@@@@@@ PUT request @@@@@@@@@@
